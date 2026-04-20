@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.coverage
+.venv/
+venv/
+ENV/
+env/
+htmlcov/
+.tox/
+
+# Mac
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+# Secret / Agent folders
+.claude/
+.serena/
+.env
+
+# Javascript / Node / Next.js
+node_modules/
+dist/
+build/
+.next/
+out/
+
+# AWS CDK
+cdk.out/
+.cdk.staging/

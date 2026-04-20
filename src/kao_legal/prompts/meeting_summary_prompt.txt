@@ -1,0 +1,30 @@
+Process the following meeting transcript or notes and produce a complete structured summary.
+
+MATTER DETAILS:
+- Matter ID: {matter_id}
+- Client: {client_code}
+- Lawyer: {lawyer_name}
+- Date: {meeting_date}
+- Jurisdiction: {jurisdiction or 'Not specified'}
+- Topics: {', '.join(topic_tags or [])}
+
+TRANSCRIPT/NOTES:
+{transcript_or_notes}
+
+REQUIRED OUTPUT:
+1. Extract a brief meeting_summary (2-4 sentences on the core discussion)
+2. List all agreed_actions as explicit instructions the lawyer agreed to take
+3. List all deadlines and key dates mentioned in the meeting
+4. List open_questions that require client confirmation or clarification
+5. Call format_email_draft with the above data to generate a client email
+6. Call export_summary to persist the complete result
+7. Return the final structured JSON with all fields
+
+Return valid JSON with these keys:
+{
+  "meeting_summary": "...",
+  "agreed_actions": ["action1", "action2"],
+  "deadlines": ["date1", "date2"],
+  "open_questions": ["question1", "question2"],
+  "s3_summary_key": "..."
+}

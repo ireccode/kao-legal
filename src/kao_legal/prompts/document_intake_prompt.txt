@@ -1,0 +1,31 @@
+Process the following documents and provide a structured intake summary.
+
+MATTER DETAILS:
+- Matter ID: {matter_id}
+- Client: {client_code}
+- Document Group: {document_group_id}
+
+DOCUMENTS:
+{documents_text}
+
+REQUIRED OUTPUT:
+1. Provide a brief summary of each document
+2. List any agreements, dates, or key terms identified
+3. Flag any missing or unclear information
+4. Call export_summary to persist the analysis
+5. Return structured JSON
+
+Return valid JSON with these keys:
+{
+  "document_summaries": [
+    {
+      "filename": "...",
+      "summary": "...",
+      "key_dates": [],
+      "key_terms": []
+    }
+  ],
+  "overall_assessment": "...",
+  "flags": [],
+  "s3_summary_key": "..."
+}
