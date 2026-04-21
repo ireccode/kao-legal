@@ -11,14 +11,15 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=False,
+        extra="ignore",
     )
 
     # AWS Configuration
-    aws_region: str = "us-east-1"
+    aws_region: str = "ap-southeast-2"
 
     # Bedrock
-    bedrock_model_id: str = "us.anthropic.claude-sonnet-4-6-v1:0"
-    bedrock_region: str = "us-east-1"
+    bedrock_model_id: str = "apac.anthropic.claude-3-haiku-20240307-v1:0"
+    bedrock_region: str = "ap-southeast-2"
 
     # S3 Buckets
     s3_raw_documents_bucket: str
@@ -34,11 +35,11 @@ class Settings(BaseSettings):
     # Cognito
     cognito_user_pool_id: str
     cognito_client_id: str
-    cognito_region: str = "us-east-1"
+    cognito_region: str = "ap-southeast-2"
 
-    # Stripe
-    stripe_secret_key: str
-    stripe_webhook_secret: str
+    # Stripe (optional — not required for core Lambda startup)
+    stripe_secret_key: str = ""
+    stripe_webhook_secret: str = ""
     credits_per_dollar: int = 100
 
     # LangFuse (Optional)
@@ -54,4 +55,4 @@ class Settings(BaseSettings):
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
     """Get cached Settings instance."""
-    return Settings()
+    return Settings()  # type: ignore[call-arg]

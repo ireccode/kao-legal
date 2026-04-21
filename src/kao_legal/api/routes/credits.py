@@ -51,7 +51,7 @@ def deduct_credits(user_id: str, amount: int) -> int:
             ExpressionAttributeValues={":amount": amount},
             ReturnValues="UPDATED_NEW",
         )
-        return int(response["Attributes"]["credits"])
+        return int(response["Attributes"]["credits"])  # type: ignore[arg-type]
     except ClientError as e:
         if e.response["Error"]["Code"] == "ConditionalCheckFailedException":
             raise InsufficientCreditsError(user_id, amount) from e
@@ -70,7 +70,7 @@ def get_credit_balance(user_id: str) -> int:
     if not item:
         return 0
 
-    return int(item.get("credits", 0))
+    return int(item.get("credits", 0))  # type: ignore[arg-type]
 
 
 @router.get("/")

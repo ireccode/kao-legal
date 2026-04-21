@@ -13,7 +13,7 @@ app = cdk.App()
 
 env = cdk.Environment(
     account=os.environ.get("CDK_DEFAULT_ACCOUNT"),
-    region=os.environ.get("CDK_DEFAULT_REGION", "us-east-1"),
+    region=os.environ.get("CDK_DEFAULT_REGION", "ap-southeast-2"),
 )
 
 storage = StorageStack(app, "KaoLegalStorage", env=env)
@@ -26,8 +26,9 @@ auth = AuthStack(
 )
 
 shared_env_vars = {
-    "AWS_REGION": os.environ.get("CDK_DEFAULT_REGION", "us-east-1"),
-    "BEDROCK_MODEL_ID": "us.anthropic.claude-sonnet-4-6-v1:0",
+    # AWS_REGION and AWS_DEFAULT_REGION are both reserved by the Lambda runtime.
+    # Do NOT set either here — Lambda injects them automatically.
+    "BEDROCK_MODEL_ID": "apac.anthropic.claude-3-haiku-20240307-v1:0",
     "S3_RAW_DOCUMENTS_BUCKET": storage.raw_documents_bucket.bucket_name,
     "S3_ANONYMIZED_BUCKET": storage.anonymized_bucket.bucket_name,
     "S3_SUMMARIES_BUCKET": storage.summaries_bucket.bucket_name,
@@ -37,9 +38,25 @@ shared_env_vars = {
     "DYNAMODB_AUDIT_TABLE": storage.audit_table.table_name,
     "COGNITO_USER_POOL_ID": auth.user_pool_id,
     "COGNITO_CLIENT_ID": auth.client_id,
+    "COGNITO_REGION": os.environ.get("CDK_DEFAULT_REGION", "ap-southeast-2"),
+    "BEDROCK_REGION": os.environ.get("CDK_DEFAULT_REGION", "ap-southeast-2"),
+    "ENVIRONMENT": "production",
+    # TODO: Move Stripe keys to AWS Secrets Manager before going live
+    "STRIPE_SECRET_KEY": os.environ.get("STRIPE_SECRET_KEY", ""),
+    "STRIPE_WEBHOOK_SECRET": os.environ.get("STRIPE_WEBHOOK_SECRET", ""),
 }
 
 api = ApiStack(app, "KaoLegalApi", env_vars=shared_env_vars, env=env)
+
+# Grant API Lambda permissions to DynamoDB and S3
+storage.users_table.grant_read_write_data(api.api_function)
+storage.credits_table.grant_read_write_data(api.api_function)
+storage.audit_table.grant_read_write_data(api.api_function)
+
+storage.raw_documents_bucket.grant_read_write(api.api_function)
+storage.anonymized_bucket.grant_read_write(api.api_function)
+storage.summaries_bucket.grant_read_write(api.api_function)
+storage.pii_mapping_bucket.grant_read_write(api.api_function)
 
 agent = AgentStack(
     app,

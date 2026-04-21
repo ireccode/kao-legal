@@ -29,12 +29,28 @@ class ApiStack(Stack):
             self,
             "ApiFunction",
             code=lambda_.DockerImageCode.from_image_asset(
-                ".",
+                "..",
                 file="Dockerfile.api",
+                exclude=["infra/cdk.out", "infra/.venv", ".venv", ".git", "frontend", "node_modules", "**/node_modules", "**/.venv"],
             ),
+            architecture=lambda_.Architecture.ARM_64,
             timeout=Duration.seconds(300),
             memory_size=1024,
             environment=env_vars,
+        )
+
+        from aws_cdk import aws_iam as iam
+        self.api_function.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
+                resources=["*"],
+            )
+        )
+        self.api_function.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["comprehend:DetectPiiEntities"],
+                resources=["*"],
+            )
         )
 
         self.api = apigw.LambdaRestApi(

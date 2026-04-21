@@ -1,0 +1,12 @@
+FROM --platform=linux/arm64 public.ecr.aws/lambda/python:3.12
+
+# Copy project files
+COPY pyproject.toml uv.lock ./
+COPY src/ ./src/
+
+# Install using pip directly — ensures packages land in /var/lang/lib/python3.12/site-packages/
+# which is on the Lambda Python path. uv --system resolves incorrectly in this base image.
+RUN pip install --no-cache-dir .
+
+# Set the CMD to your Mangum handler mapped in app.py
+CMD ["kao_legal.api.app.handler"]

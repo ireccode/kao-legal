@@ -9,11 +9,11 @@ Build a production-ready Legal Advisor Agent SaaS with two core AI workflows, a 
 with credit-based billing. The system is built on the Strands Agents SDK with Amazon Bedrock as the LLM provider.  
  
 Critical Documentation URLs  
-* Strands Agents SDK: https://strandsagents.com/latest/documentation/docs/get-started/quickstart/  
-* Strands Tools Reference: https://strandsagents.com/latest/documentation/docs/user-guide/concepts/tools/python-tools/  
-* Strands Bedrock provider: https://strandsagents.com/latest/documentation/docs/user-guide/concepts/models/amazon-bedrock/  
-* Strands Multi-agent: https://strandsagents.com/latest/documentation/docs/user-guide/concepts/multi-agent/ 
-* Strands Observability: https://strandsagents.com/latest/documentation/docs/user-guide/observability/  
+* Strands Agents SDK: https://strandsagents.com/docs/user-guide/quickstart/overview/
+* Strands Tools Reference: https://strandsagents.com/docs/user-guide/concepts/tools/
+* Strands Bedrock provider: https://strandsagents.com/docs/user-guide/concepts/model-providers/amazon-bedrock/
+* Strands Multi-agent: https://strandsagents.com/docs/user-guide/concepts/multi-agent/agent-to-agent/
+* Strands Observability: https://strandsagents.com/docs/user-guide/observability-evaluation/observability/
 * AWS Comprehend PII detection: https://docs.aws.amazon.com/comprehend/latest/dg/how-pii.html  
 * boto3 Comprehend: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/comprehend.html  
 * AWS CDK Python: https://docs.aws.amazon.com/cdk/v2/guide/work-with-cdk-python.html  
@@ -700,9 +700,9 @@ python
   Key Documentation URLs
 python
 ```
-  - Strands Agents SDK: https://strandsagents.com/latest/
+  - Strands Agents SDK: https://strandsagents.com/docs/user-guide/quickstart/overview/
   - Strands GitHub: https://github.com/strands-agents/sdk-python
-  - Strands tools guide: https://strandsagents.com/latest/user-guide/concepts/tools/python-tools/
+  - Strands tools guide: https://strandsagents.com/docs/user-guide/concepts/tools/
   - Bedrock model IDs: https://docs.aws.amazon.com/bedrock/latest/userguide/model-ids.html
   - AWS Comprehend PII: https://docs.aws.amazon.com/comprehend/latest/dg/how-pii.html
   - Boto3 Comprehend: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/comprehend.html
@@ -1582,7 +1582,7 @@ python
 ```
   Deductions:
   - (-1.0) Strands Agents SDK is relatively new (2024/2025); exact API signatures may shift — implementing agent should verify
-  against live docs at https://strandsagents.com/latest/
+  against live docs at https://strandsagents.com/docs/user-guide/quickstart/python/
   - (-0.5) CDK stack details are high-level; exact Bedrock IAM permission strings and VPC configuration for ECS will need
   iteration
 python
@@ -1608,5 +1608,5 @@ python
 python
 ```
   Score: 8.5/10 — high confidence for one-pass implementation; the only uncertainty is exact Strands SDK API signatures which
-  should be verified against https://strandsagents.com/latest/ during implementation.
+  should be verified against https://strandsagents.com/docs/user-guide/quickstart/python/ during implementation.
 ```

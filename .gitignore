@@ -11,9 +11,12 @@ ENV/
 env/
 htmlcov/
 .tox/
+*.log
 
 # Mac
 .DS_Store
+.terminal-commands
+scripts/seed_credits.py
 
 # IDEs
 .vscode/

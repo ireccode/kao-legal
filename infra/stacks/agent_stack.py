@@ -96,13 +96,21 @@ class AgentStack(Stack):
             task_role=self.agent_task_role,
             cpu=1024,
             memory_limit_mib=2048,
+            runtime_platform=ecs.RuntimePlatform(
+                cpu_architecture=ecs.CpuArchitecture.ARM64,
+                operating_system_family=ecs.OperatingSystemFamily.LINUX,
+            ),
         )
 
         log_group = logs.LogGroup(self, "AgentLogs")
 
         task_definition.add_container(
             "AgentContainer",
-            image=ecs.ContainerImage.from_asset(".", file="Dockerfile.agent"),
+            image=ecs.ContainerImage.from_asset(
+                "..",
+                file="Dockerfile.agent",
+                exclude=["infra/cdk.out", "infra/.venv", ".venv", ".git", "frontend", "node_modules", "**/node_modules", "**/.venv"],
+            ),
             environment=env_vars,
             logging=ecs.LogDrivers.aws_logs(
                 stream_prefix="agent",

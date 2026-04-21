@@ -1,0 +1,17 @@
+FROM --platform=linux/arm64 python:3.12-slim
+
+# Install uv via pip (avoids ghcr.io registry auth requirement)
+RUN pip install uv --no-cache-dir
+
+WORKDIR /app
+
+# Copy project files
+COPY pyproject.toml uv.lock ./
+COPY src/ ./src/
+
+# Install the project into the system Python
+RUN uv pip install --system .
+
+# Note: The specific worker command can be overridden by ECS task definitions if needed.
+# For now, this serves as the foundational image for any background Agent workers.
+CMD ["python", "-m", "kao_legal.agents.worker"]

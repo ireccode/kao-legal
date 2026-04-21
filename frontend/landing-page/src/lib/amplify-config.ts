@@ -8,8 +8,8 @@ export function configureAmplify(): void {
   Amplify.configure({
     Auth: {
       Cognito: {
-        userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID!,
-        userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID!,
+        userPoolId: process.env.NEXT_PUBLIC_COGNITO_USER_POOL_ID || "us-east-1_dummy123",
+        userPoolClientId: process.env.NEXT_PUBLIC_COGNITO_CLIENT_ID || "dummyclient123",
         loginWith: {
           email: true,
         },
