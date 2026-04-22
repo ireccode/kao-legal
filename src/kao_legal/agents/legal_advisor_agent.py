@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import botocore.config
 from strands import Agent
 from strands.models import BedrockModel
 
@@ -27,11 +28,23 @@ def create_legal_advisor_agent() -> Agent:
     """
     settings = get_settings()
 
+    # Tight boto config for background workers:
+    # - read_timeout=60: each Bedrock call times out at 60s max
+    # - max_attempts=2: one retry only (total ≤2 calls)
+    # - mode=adaptive: adds jitter for transient throttles
+    # Net effect: worst-case Bedrock time ~120s, leaving 3+ minutes
+    # for error handling and DynamoDB writes within Lambda 300s timeout.
+    boto_config = botocore.config.Config(
+        read_timeout=60,
+        retries={"mode": "adaptive", "max_attempts": 2},
+    )
+
     model = BedrockModel(
         model_id=settings.bedrock_model_id,
         region_name=settings.bedrock_region,
         temperature=0.1,
         max_tokens=4096,
+        boto_client_config=boto_config,
     )
 
     callbacks = []

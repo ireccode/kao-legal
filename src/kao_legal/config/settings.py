@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     aws_region: str = "ap-southeast-2"
 
     # Bedrock
-    bedrock_model_id: str = "apac.anthropic.claude-3-haiku-20240307-v1:0"
+    bedrock_model_id: str = "apac.anthropic.claude-3-5-sonnet-20241022-v2:0"
     bedrock_region: str = "ap-southeast-2"
 
     # S3 Buckets
@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     dynamodb_users_table: str = "kao-legal-users"
     dynamodb_credits_table: str = "kao-legal-credits"
     dynamodb_audit_table: str = "kao-legal-audit"
+    dynamodb_jobs_table: str = "kao-legal-jobs"
 
     # Cognito
     cognito_user_pool_id: str
@@ -50,6 +51,7 @@ class Settings(BaseSettings):
     # Application
     log_level: str = "INFO"
     environment: str = "development"
+    lambda_function_name: str = ""  # set by Lambda runtime for self-invoke
 
 
 @lru_cache(maxsize=1)

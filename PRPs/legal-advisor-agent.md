@@ -1609,4 +1609,39 @@ python
 ```
   Score: 8.5/10 — high confidence for one-pass implementation; the only uncertainty is exact Strands SDK API signatures which
   should be verified against https://strandsagents.com/docs/user-guide/quickstart/python/ during implementation.
+
+
+---
+## Lessons Learned (Deployment & Debugging Phase)
+
+### 1. Architecture Alignment (Apple Silicon vs. AWS)
+*   **Problem:** Building Docker images on Apple Silicon (arm64) for Lambda/Fargate defaults to `x86_64` in CDK/Docker unless explicitly overridden, leading to `Runtime.InvalidEntrypoint` errors.
+*   **Lesson:** Always force `--platform=linux/arm64` in Dockerfiles and set `architecture=lambda.Architecture.ARM_64` (Lambda) or `runtime_platform=ecs.CpuArchitecture.ARM64` (Fargate) in CDK when developing on M-series Macs.
+
+### 2. Bedrock Regional Connectivity & Inference Profiles
+*   **Problem:** Direct foundation model IDs (e.g., `anthropic.claude-3-sonnet...`) often fail with `ValidationException` in non-US regions like `ap-southeast-2` (Sydney) due to account-specific throughput constraints.
+*   **Lesson:** Use **Inference Profiles** (prefix `au.` or `apac.`) for Bedrock in regional deployments. They handle cross-region routing and typically have more generous on-demand quotas.
+*   **Quota Tip:** `apac.anthropic.claude-3-5-sonnet-20241022-v2:0` has significantly higher throughput limits in Sydney compared to Haiku profiles.
+
+### 3. Workflow Timeouts & Async Job Pattern
+*   **Problem:** API Gateway has a **hard 29-second timeout**. Bedrock agents performing complex tool chains (PII detection → model logic → S3 export) often exceed 60-180 seconds.
+*   **Lesson:** Implement the **Async Submit/Poll Pattern**.
+    *   **Submit (POST):** Deducts credits, creates a job record in DynamoDB, triggers an asynchronous Lambda invocation (`InvocationType="Event"`), and returns a `job_id` immediately (202 Accepted).
+    *   **Poll (GET):** Client polls `/jobs/{job_id}` until `status == "completed"`.
+*   **Self-Invocation:** A single Lambda can act as both the API handler and the background worker by checking the incoming event shape and self-invoking asynchronously.
+
+### 4. CDK Circular Dependencies
+*   **Problem:** Self-referencing a Lambda's ARN or Name in its own IAM policies or Environment Variables via CDK tokens (e.g., `self.fn.function_arn`) creates a CloudFormation circular dependency.
+*   **Lesson:** Use a **literal function name** (string) and manually construct the ARN using pseudo-parameters: `f"arn:aws:lambda:{Aws.REGION}:{Aws.ACCOUNT_ID}:function:{name}"`.
+
+### 5. Credit Safety & Idempotent Refunds
+*   **Problem:** Deducting credits before a task starts risks "stealing" credits if the task fails or times out.
+*   **Lesson:** Use an atomic DynamoDB `update_item` with a `ConditionExpression` to deduct upfront, but wrap the entire background worker in a `try/except` block that calls a `refund_credits` utility on **any** failure (including timeouts and throttles).
+
+### 6. Stateful Error Handling (Heal-on-Read)
+*   **Problem:** If a background Lambda is killed by a 300s timeout, it may fail to update the job status to "FAILED" in DynamoDB, leaving it stuck in "RUNNING".
+*   **Lesson:** 
+    *   **Tighten Boto:** Set `read_timeout=60` and `max_attempts=2` so the model fails well within the 300s Lambda limit, leaving headroom for the status update.
+    *   **Heal-on-Read:** The polling endpoint should check if a job is `RUNNING` but has an `error` field or is older than expected, and automatically update its status to `FAILED`.
+
 ```

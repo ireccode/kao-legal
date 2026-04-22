@@ -28,7 +28,7 @@ auth = AuthStack(
 shared_env_vars = {
     # AWS_REGION and AWS_DEFAULT_REGION are both reserved by the Lambda runtime.
     # Do NOT set either here — Lambda injects them automatically.
-    "BEDROCK_MODEL_ID": "apac.anthropic.claude-3-haiku-20240307-v1:0",
+    "BEDROCK_MODEL_ID": "apac.anthropic.claude-3-5-sonnet-20241022-v2:0",
     "S3_RAW_DOCUMENTS_BUCKET": storage.raw_documents_bucket.bucket_name,
     "S3_ANONYMIZED_BUCKET": storage.anonymized_bucket.bucket_name,
     "S3_SUMMARIES_BUCKET": storage.summaries_bucket.bucket_name,
@@ -36,6 +36,7 @@ shared_env_vars = {
     "DYNAMODB_USERS_TABLE": storage.users_table.table_name,
     "DYNAMODB_CREDITS_TABLE": storage.credits_table.table_name,
     "DYNAMODB_AUDIT_TABLE": storage.audit_table.table_name,
+    "DYNAMODB_JOBS_TABLE": storage.jobs_table.table_name,
     "COGNITO_USER_POOL_ID": auth.user_pool_id,
     "COGNITO_CLIENT_ID": auth.client_id,
     "COGNITO_REGION": os.environ.get("CDK_DEFAULT_REGION", "ap-southeast-2"),
@@ -52,6 +53,7 @@ api = ApiStack(app, "KaoLegalApi", env_vars=shared_env_vars, env=env)
 storage.users_table.grant_read_write_data(api.api_function)
 storage.credits_table.grant_read_write_data(api.api_function)
 storage.audit_table.grant_read_write_data(api.api_function)
+storage.jobs_table.grant_read_write_data(api.api_function)
 
 storage.raw_documents_bucket.grant_read_write(api.api_function)
 storage.anonymized_bucket.grant_read_write(api.api_function)

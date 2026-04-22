@@ -58,6 +58,30 @@ def deduct_credits(user_id: str, amount: int) -> int:
         raise
 
 
+def refund_credits(user_id: str, amount: int) -> int:
+    """
+    Add credits back to user account (refund after a failed operation).
+
+    Args:
+        user_id: The authenticated user's ID.
+        amount: Number of credits to restore.
+
+    Returns:
+        New credit balance after refund.
+    """
+    settings = get_settings()
+    dynamodb = boto3.resource("dynamodb", region_name=settings.aws_region)
+    table = dynamodb.Table(settings.dynamodb_credits_table)
+
+    response = table.update_item(
+        Key={"user_id": user_id},
+        UpdateExpression="SET credits = if_not_exists(credits, :zero) + :amount",
+        ExpressionAttributeValues={":amount": amount, ":zero": 0},
+        ReturnValues="UPDATED_NEW",
+    )
+    return int(response["Attributes"]["credits"])  # type: ignore[arg-type]
+
+
 def get_credit_balance(user_id: str) -> int:
     """Get current credit balance for a user."""
     settings = get_settings()

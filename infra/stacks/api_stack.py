@@ -25,9 +25,14 @@ class ApiStack(Stack):
     ) -> None:
         super().__init__(scope, construct_id, **kwargs)
 
+        # Explicit function name avoids CloudFormation circular dependency
+        # when the function needs to reference its own ARN in an IAM policy.
+        _function_name = "kao-legal-api-handler"
+
         self.api_function = lambda_.DockerImageFunction(
             self,
             "ApiFunction",
+            function_name=_function_name,
             code=lambda_.DockerImageCode.from_image_asset(
                 "..",
                 file="Dockerfile.api",
@@ -39,7 +44,7 @@ class ApiStack(Stack):
             environment=env_vars,
         )
 
-        from aws_cdk import aws_iam as iam
+        from aws_cdk import aws_iam as iam, Aws
         self.api_function.add_to_role_policy(
             iam.PolicyStatement(
                 actions=["bedrock:InvokeModel", "bedrock:InvokeModelWithResponseStream"],
@@ -52,6 +57,17 @@ class ApiStack(Stack):
                 resources=["*"],
             )
         )
+        # Use constructed ARN from literal name — no circular reference
+        self.api_function.add_to_role_policy(
+            iam.PolicyStatement(
+                actions=["lambda:InvokeFunction"],
+                resources=[
+                    f"arn:aws:lambda:{Aws.REGION}:{Aws.ACCOUNT_ID}:function:{_function_name}"
+                ],
+            )
+        )
+        # Pass literal function name env var — no token self-reference
+        self.api_function.add_environment("LAMBDA_FUNCTION_NAME", _function_name)
 
         self.api = apigw.LambdaRestApi(
             self,

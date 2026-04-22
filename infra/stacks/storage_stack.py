@@ -122,3 +122,17 @@ class StorageStack(Stack):
             removal_policy=RemovalPolicy.RETAIN,
             point_in_time_recovery=True,
         )
+
+        # DynamoDB: Jobs table — async job state for long-running agent tasks
+        self.jobs_table = dynamodb.Table(
+            self,
+            "JobsTable",
+            partition_key=dynamodb.Attribute(
+                name="job_id",
+                type=dynamodb.AttributeType.STRING,
+            ),
+            billing_mode=dynamodb.BillingMode.PAY_PER_REQUEST,
+            encryption=dynamodb.TableEncryption.AWS_MANAGED,
+            removal_policy=RemovalPolicy.RETAIN,
+            time_to_live_attribute="ttl",  # auto-expire old jobs after 24h
+        )
